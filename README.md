@@ -9,6 +9,10 @@
 
 ## Introduction
 
+Note: This fork is contains the following changes:
+1. The source audio can have sounds with duration <= 1 second. The code will consider it as well or the short text.
+2. Adding Melo TTS as dependency in requirements.txt.
+
 ### OpenVoice V1
 
 As we detailed in our [paper](https://arxiv.org/abs/2312.01479) and [website](https://research.myshell.ai/open-voice), the advantages of OpenVoice are three-fold:
