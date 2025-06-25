@@ -26,7 +26,7 @@ class OpenVoiceInfer:
     def infer(self, text: str, reference_audio_path: str, output_audio_path: str, segments_dir: str):
         print(f"[🗣️] '{text}' | Ref: {reference_audio_path} → Out: {output_audio_path}")
 
-        target_se, _ = se_extractor.get_se(reference_audio_path, self.converter, target_dir=segments_dir, vad=False)
+        target_se, _ = se_extractor.get_se(reference_audio_path, self.converter, target_dir=segments_dir, vad=True)
         tmp_base_path = "./tmp/base.wav"
         os.makedirs("tmp", exist_ok=True)
 
@@ -55,7 +55,21 @@ if __name__ == "__main__":
     infer = OpenVoiceInfer(device="cpu", language="EN")
 
     for i, sub in enumerate(subtitles):
-        print(f"\n[🎞️] Processing subtitle {i}")
+        if (sub.end.total_seconds() - sub.start.total_seconds()) < 0.1:
+            print(f"[❌] Skipping subtitle {i} due to short duration: {sub.start} - {sub.end}")
+            continue
+
+        # Skip empty subtitles
+        if not sub.content.strip():
+            print(f"[❌] Skipping empty subtitle {i}")
+            continue
+        print(f"\n[🎞️] Processing subtitle {i},")
         ref_audio = os.path.join(SOURCE_SEGMENTS_DIR, f"ref_{i:04d}.wav")
         output_audio = os.path.join(DEST_SEGMENTS_DIR, f"converted_{i:04d}.wav")
-        infer.infer(sub.content, ref_audio, output_audio, DEST_SEGMENTS_DIR)
+        try:
+            infer.infer(sub.content, ref_audio, output_audio, DEST_SEGMENTS_DIR)
+        except Exception as e:
+            print(f"[❌] Error processing subtitle {i}: {e}")
+            continue
+
+    print("[🎉] All subtitles processed successfully!")
