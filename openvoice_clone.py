@@ -23,10 +23,10 @@ class OpenVoiceInfer:
 
         se_extractor.model = WhisperModel("large", device="cpu", compute_type="float32")
 
-    def infer(self, text: str, reference_audio_path: str, output_audio_path: str):
+    def infer(self, text: str, reference_audio_path: str, output_audio_path: str, segments_dir: str):
         print(f"[🗣️] '{text}' | Ref: {reference_audio_path} → Out: {output_audio_path}")
 
-        target_se, _ = se_extractor.get_se(reference_audio_path, self.converter, vad=False)
+        target_se, _ = se_extractor.get_se(reference_audio_path, self.converter, target_dir=segments_dir, vad=False)
         tmp_base_path = "./tmp/base.wav"
         os.makedirs("tmp", exist_ok=True)
 
@@ -44,9 +44,9 @@ class OpenVoiceInfer:
         print(f"[✅] Done: {output_audio_path}")
 
 if __name__ == "__main__":
-    SRT_PATH = "/Users/prateek/work/github/test/data/translated_polished.srt"
-    SOURCE_SEGMENTS_DIR = "/Users/prateek/work/github/test/data/segments"
-    DEST_SEGMENTS_DIR = "./processed"
+    SRT_PATH = "/Users/prateek/work/github/video-project/data/translated_polished.srt"
+    SOURCE_SEGMENTS_DIR = "/Users/prateek/work/github/video-project/data/segments"
+    DEST_SEGMENTS_DIR = "/Users/prateek/work/github/video-project/data/processed"
     os.makedirs(DEST_SEGMENTS_DIR, exist_ok=True)
 
     with open(SRT_PATH, "r", encoding="utf-8") as f:
@@ -58,4 +58,4 @@ if __name__ == "__main__":
         print(f"\n[🎞️] Processing subtitle {i}")
         ref_audio = os.path.join(SOURCE_SEGMENTS_DIR, f"ref_{i:04d}.wav")
         output_audio = os.path.join(DEST_SEGMENTS_DIR, f"converted_{i:04d}.wav")
-        infer.infer(sub.content, ref_audio, output_audio)
+        infer.infer(sub.content, ref_audio, output_audio, DEST_SEGMENTS_DIR)
